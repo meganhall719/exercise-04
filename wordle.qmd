@@ -4,13 +4,42 @@ format: html
 editor: visual
 ---
 
-### step 1 ###
-create a function that loads in a dictionary that loads in a data set takes in file name. 
-```{r}
-c <-read.csv("https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/collins-scrabble-words-2019.txt")
-g<-read.csv("https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/google-10000-english-usa-no-swears.txt")
-load_dictionary(<filename>)
+### step 1
 
-solution_list <-load_dictionary(c)
-valid_list<-load_dictionary(g)
+create a function that loads in a dictionary that loads in a data set takes in file name.
+
+```{r}
+library(tidyverse)
+library(dplyr)
+load_dictionary <- function(filename) {
+  words <- read.table(filename, skip = 1, stringsAsFactors = FALSE)
+  return(words[[1]])
+}
+valid_list <- load_dictionary("https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/collins-scrabble-words-2019.txt")
+solution_list<- load_dictionary("https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/google-10000-english-usa-no-swears.txt")
+
 ```
+
+### Step 2
+
+winnowing your variable solution_list to only include words that are in valid_list
+
+```{r}
+solution_list <- intersect(solution_list, valid_list)
+```
+
+### Step 3 Creating pick_solution
+
+removing words from solution_list that are not 5 letters in length
+
+```{r}
+pick_solution <- function(solution_list, word_lenght = 5) {
+  five_letter_words <- solution_list[nchar(solution_list) == word_length]
+  chosen_word <- sample(five_letter_words, 1)
+  return(strsplit(chosen_word,"")[[1]])
+}
+```
+
+### Step 4
+
+Creating Play_wordle() and evaluate_guess()
