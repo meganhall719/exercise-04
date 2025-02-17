@@ -1,0 +1,106 @@
+---
+title: "exercise-04"
+format: html
+editor: visual
+---
+
+### step 1
+
+create a function that loads in a dictionary that loads in a data set takes in file name.
+
+```{r}
+library(dplyr)
+library(stringr)
+
+load_dictionary <- function(filename) {
+  words <- read.delim(filename, header = FALSE, stringsAsFactors = FALSE)$V1
+  return(words)
+}
+```
+
+```{r}
+c <-"https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/collins-scrabble-words-2019.txt"
+g<-"https://raw.githubusercontent.com/difiore/ada-datasets/refs/heads/main/google-10000-english-usa-no-swears.txt"
+```
+
+```{r}
+solution_list <-load_dictionary(g)
+valid_list<-load_dictionary(c)
+```
+
+Testing the code so far..
+
+```{r}
+str(valid_list)
+```
+
+```{r}
+str(solution_list)
+```
+
+```{r}
+solution_list <- intersect(solution_list, valid_list)
+```
+
+```{r}
+print(length(solution_list))
+```
+
+Above, we winnowed the solution_list variable and found that the new list contains 8337 words
+
+Next, we remove all words that are not 5 letters long, and randomly select one of those remaining 5 letter words as the solution
+
+```{r}
+pick_solution <- function(solution_list) {
+  solution_list <- solution_list[nchar(solution_list) == 5]
+  solution_word <- sample(solution_list, 1)
+  wordvec <- strsplit(solution_word, "")[[1]]
+  
+  return(wordvec)
+}
+```
+
+```{r}
+wordvec <- pick_solution(solution_list)
+```
+
+```{r}
+wordvec
+```
+
+Now to put the game together using a function "play_wordle", first writing a code for how the function will evaluate the variables associated with the user guess.
+
+```{r}
+play_wordle <- function(wordvec) {
+  cat("Welcome to Wordle by Megan and Erika!\n")
+  cat("You have six guesses to get the 5-letter word. Good luck!\n\n")
+  
+  guesses_left <- 6
+  letters_left <- LETTERS
+  
+  while (guesses_left > 0) {
+    cat("Letters left:", paste(letters_left, collapse = " "), "\n")
+    guess <- readline(paste0("Enter guess (", guesses_left, " left): "))
+    
+    guess <- toupper(guess)
+    while (nchar(guess) != length(wordvec)) {
+      guess <- readline("Invalid input! Enter a 5-letter word: ")
+      guess <- toupper(guess)
+    }
+    
+    result <- evaluateGuess(guess, wordvec)
+    cat("Result: ", paste(result, collapse = " "), "\n\n")
+
+    letters_left <- setdiff(letters_left, unlist(strsplit(guess, "")))
+    
+    if (all(result == "G")) {
+      cat("You won in", 7 - guesses_left, "guesses!\n")
+      return()
+    }
+    
+    guesses_left <- guesses_left - 1
+  }
+  
+  cat("Sorry, you lost! The word was:", paste(wordvec, collapse = ""), "\n")
+}
+```
